@@ -1,0 +1,6 @@
+@ImpulseClub_HostAddress = http://localhost:5037
+
+GET {{ImpulseClub_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
