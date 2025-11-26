@@ -10,6 +10,9 @@ namespace ImpulseClub.Repositories
         private readonly AppDbContext _ctx;
         public UserRepository(AppDbContext ctx) { _ctx = ctx; }
 
+        public Task<User?> GetById(Guid id) =>
+            _ctx.Users.FirstOrDefaultAsync(x => x.Id == id);
+
         public Task<User?> GetByEmailAddress(string email) =>
             _ctx.Users.FirstOrDefaultAsync(u => u.Email == email);
 
@@ -25,6 +28,11 @@ namespace ImpulseClub.Repositories
         public async Task UpdateAsync(User user)
         {
             _ctx.Users.Update(user);
+            await _ctx.SaveChangesAsync();
+        }
+        public async Task DeleteAsync(User user)
+        {
+            _ctx.Users.Remove(user);
             await _ctx.SaveChangesAsync();
         }
     }
