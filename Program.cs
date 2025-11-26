@@ -20,8 +20,7 @@ if (!string.IsNullOrEmpty(port))
 }
 
 builder.Services.AddControllers();
-builder.Services.AddSwaggerGen();
-
+builder.Services.AddOpenApi();
 builder.Services.AddCors(opt =>
 {
     opt.AddPolicy("AllowAll", p => p
@@ -44,7 +43,7 @@ builder.Services
             ValidateIssuer = true,
             ValidateAudience = true,
             ValidateLifetime = true,
-            ValidateIssuerSigningKey=true,
+            ValidateIssuerSigningKey = true,
             ValidIssuer = jwtIssuer,
             ValidAudience = jwtAudience,
             IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
@@ -74,16 +73,17 @@ opt.UseNpgsql(connectionString));
 builder.Services.AddScoped<IHospitalRepository, HospitalRepository>();
 builder.Services.AddScoped<IHospitalService, HospitalService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();  
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 
+// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.MapOpenApi();
+    app.UseHttpsRedirection();
 }
-
 app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();

@@ -1,9 +1,9 @@
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
 using ImpulseClub.Models;
 using ImpulseClub.Models.DTOS;
 using ImpulseClub.Models.DTOS.ImpulseClub.Models.DTOS;
 using ImpulseClub.Repositories;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;

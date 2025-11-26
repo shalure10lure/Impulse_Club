@@ -26,13 +26,19 @@ namespace ImpulseClub.Services
         public async Task<User> UpdateUser(UpdateUserDto dto, Guid id)
         {
             User? user = await GetOne(id);
-            if (user == null) throw new Exception("User doesnt exist.");
+            if (user == null)
+                throw new Exception("Usuario no encontrado");
 
-            user.Username = dto.Name;
-            user.Email = dto.Email;
-            user.PasswordHash = dto.Password;
+            if (!string.IsNullOrEmpty(dto.Name))
+                user.Username = dto.Name;
+
+            if (!string.IsNullOrEmpty(dto.Email))
+                user.Email = dto.Email;
+            if (!string.IsNullOrEmpty(dto.Password))
+                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
 
             await _repo.UpdateAsync(user);
+
             return user;
         }
 
