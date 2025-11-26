@@ -4,6 +4,7 @@ namespace ImpulseClub.Repositories
 {
     public interface IUserRepository
     {
+        Task<IEnumerable<User>> GetAll();
         Task<User?> GetById(Guid id);
         Task<User?> GetByEmailAddress(string email);
         Task<User?> GetByRefreshToken(string refreshToken); 

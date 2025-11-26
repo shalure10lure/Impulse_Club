@@ -10,6 +10,10 @@ namespace ImpulseClub.Repositories
         private readonly AppDbContext _ctx;
         public UserRepository(AppDbContext ctx) { _ctx = ctx; }
 
+        public async Task<IEnumerable<User>> GetAll()
+        {
+            return await _ctx.Users.ToListAsync();
+        }
         public Task<User?> GetById(Guid id) =>
             _ctx.Users.FirstOrDefaultAsync(x => x.Id == id);
 
