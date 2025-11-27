@@ -4,11 +4,8 @@ using ImpulseClub.Repositories;
 using ImpulseClub.Services;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using DotNetEnv;
-
-//dotnet add package DotNetEnv
 
 var builder = WebApplication.CreateBuilder(args);
 Env.Load();
@@ -51,15 +48,17 @@ builder.Services
             ClockSkew = TimeSpan.Zero
         };
     });
+
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly", p => p.RequireRole("Admin"));
+    options.AddPolicy("FundadorOrAdmin", p => p.RequireRole("Fundador", "Admin"));
 });
+
 var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
 
 if (string.IsNullOrEmpty(connectionString))
 {
-    // fallback local si quieres
     var dbName = Environment.GetEnvironmentVariable("POSTGRES_DB");
     var dbUser = Environment.GetEnvironmentVariable("POSTGRES_USER");
     var dbPass = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD");
@@ -68,22 +67,21 @@ if (string.IsNullOrEmpty(connectionString))
 
     connectionString = $"Host={dbHost};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPass}";
 }
-builder.Services.AddDbContext<AppDbContext>(opt =>
-opt.UseNpgsql(connectionString));
-builder.Services.AddScoped<IHospitalRepository, HospitalRepository>();
-builder.Services.AddScoped<IHospitalService, HospitalService>();
+
+builder.Services.AddDbContext<AppDbContext>(opt => opt.UseNpgsql(connectionString));
+
+// Registrar servicios (próximos pasos)
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.UseHttpsRedirection();
 }
+
 app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
