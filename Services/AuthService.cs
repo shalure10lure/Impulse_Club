@@ -1,4 +1,4 @@
-using ImpulseClub.Models;
+using ImpulseClub.Entities;
 using ImpulseClub.Models.DTOS;
 using ImpulseClub.Models.DTOS.ImpulseClub.Models.DTOS;
 using ImpulseClub.Repositories;
@@ -45,8 +45,8 @@ namespace ImpulseClub.Services
 
             var resp = new LoginResponseDto
             {
-                User = new UserDto { Id = user.Id, Username = user.Username, Email = user.Email },
-                Role = user.Role,
+                User = new UserDto { Id = user.Id, Username = user.Nombre, Email = user.Email },
+                Role = user.Rol,
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
                 ExpiresIn = expiresIn,
@@ -59,12 +59,12 @@ namespace ImpulseClub.Services
         public async Task<string> RegisterAsync(RegisterDto dto)
         {
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
-            var user = new User
+            var user = new Usuario
             {
                 Email = dto.Email,
                 PasswordHash = hashedPassword,
-                Username = dto.Username,
-                Role = dto.Role
+                Nombre = dto.Username,
+                Rol = dto.Role
             };
             await _users.AddAsync(user);
             return user.Id.ToString();
@@ -94,8 +94,8 @@ namespace ImpulseClub.Services
 
             var resp = new LoginResponseDto
             {
-                User = new UserDto { Id = user.Id, Username = user.Username, Email = user.Email },
-                Role = user.Role,
+                User = new UserDto { Id = user.Id, Username = user.Nombre, Email = user.Email },
+                Role = user.Rol,
                 AccessToken = accessToken,
                 RefreshToken = newRefresh,
                 ExpiresIn = expiresIn,
@@ -105,7 +105,7 @@ namespace ImpulseClub.Services
             return (true, resp);
         }
 
-        private (string token, int expiresInSeconds, string jti) GenerateJwtToken(User user)
+        private (string token, int expiresInSeconds, string jti) GenerateJwtToken(Usuario user)
         {
             var jwtSection = _configuration.GetSection("Jwt");
             var key = jwtSection["Key"]!;
@@ -118,8 +118,8 @@ namespace ImpulseClub.Services
             var claims = new List<Claim> {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Role, user.Role),
+                new Claim(ClaimTypes.Name, user.Nombre),
+                new Claim(ClaimTypes.Role, user.Rol),
                 new Claim(JwtRegisteredClaimNames.Jti, jti),
             };
 
