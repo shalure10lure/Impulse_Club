@@ -4,7 +4,6 @@ using ImpulseClub.Models.DTOS.ImpulseClub.Models.DTOS;
 using ImpulseClub.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -31,7 +30,7 @@ namespace ImpulseClub.Services
             var ok = BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash);
             if (!ok) return (false, null);
 
-            // Generar par access/refresh
+            // Generate access/refresh token pair
             var (accessToken, expiresIn, jti) = GenerateJwtToken(user);
             var refreshToken = GenerateSecureRefreshToken();
 
@@ -45,8 +44,8 @@ namespace ImpulseClub.Services
 
             var resp = new LoginResponseDto
             {
-                User = new UserDto { Id = user.Id, Username = user.Nombre, Email = user.Email },
-                Role = user.Rol,
+                User = new UserDto { Id = user.Id, Username = user.Name, Email = user.Email },
+                Role = user.Role,
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
                 ExpiresIn = expiresIn,
@@ -59,12 +58,12 @@ namespace ImpulseClub.Services
         public async Task<string> RegisterAsync(RegisterDto dto)
         {
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(dto.Password);
-            var user = new Usuario
+            var user = new User
             {
                 Email = dto.Email,
                 PasswordHash = hashedPassword,
-                Nombre = dto.Username,
-                Rol = dto.Role
+                Name = dto.Username,
+                Role = dto.Role
             };
             await _users.AddAsync(user);
             return user.Id.ToString();
@@ -72,30 +71,30 @@ namespace ImpulseClub.Services
 
         public async Task<(bool ok, LoginResponseDto? response)> RefreshAsync(RefreshRequestDto dto)
         {
-            // Buscar usuario que tenga ese refresh token (simple)
+            // Find user with that refresh token
             var user = await _users.GetByRefreshToken(dto.RefreshToken);
             if (user == null) return (false, null);
 
-            // Validaciones de refresh
+            // Refresh validations
             if (user.RefreshToken != dto.RefreshToken) return (false, null);
             if (user.RefreshTokenRevokedAt.HasValue) return (false, null);
             if (!user.RefreshTokenExpiresAt.HasValue || user.RefreshTokenExpiresAt.Value < DateTime.UtcNow) return (false, null);
 
-            // Rotación: generar nuevo access + refresh y revocar el anterior
+            // Rotation: generate new access + refresh and revoke the old one
             var (accessToken, expiresIn, jti) = GenerateJwtToken(user);
             var newRefresh = GenerateSecureRefreshToken();
             var refreshDays = int.Parse(_configuration["Jwt:RefreshDays"] ?? "14");
 
             user.RefreshToken = newRefresh;
             user.RefreshTokenExpiresAt = DateTime.UtcNow.AddDays(refreshDays);
-            user.RefreshTokenRevokedAt = null; // seguimos activo
+            user.RefreshTokenRevokedAt = null;
             user.CurrentJwtId = jti;
             await _users.UpdateAsync(user);
 
             var resp = new LoginResponseDto
             {
-                User = new UserDto { Id = user.Id, Username = user.Nombre, Email = user.Email },
-                Role = user.Rol,
+                User = new UserDto { Id = user.Id, Username = user.Name, Email = user.Email },
+                Role = user.Role,
                 AccessToken = accessToken,
                 RefreshToken = newRefresh,
                 ExpiresIn = expiresIn,
@@ -105,7 +104,7 @@ namespace ImpulseClub.Services
             return (true, resp);
         }
 
-        private (string token, int expiresInSeconds, string jti) GenerateJwtToken(Usuario user)
+        private (string token, int expiresInSeconds, string jti) GenerateJwtToken(User user)
         {
             var jwtSection = _configuration.GetSection("Jwt");
             var key = jwtSection["Key"]!;
@@ -118,8 +117,8 @@ namespace ImpulseClub.Services
             var claims = new List<Claim> {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(ClaimTypes.Name, user.Nombre),
-                new Claim(ClaimTypes.Role, user.Rol),
+                new Claim(ClaimTypes.Name, user.Name),
+                new Claim(ClaimTypes.Role, user.Role),
                 new Claim(JwtRegisteredClaimNames.Jti, jti),
             };
 
@@ -142,7 +141,7 @@ namespace ImpulseClub.Services
 
         private static string GenerateSecureRefreshToken()
         {
-            // 64 bytes aleatorios en Base64Url
+            // 64 random bytes in Base64Url
             var bytes = RandomNumberGenerator.GetBytes(64);
             return Base64UrlEncoder.Encode(bytes);
         }

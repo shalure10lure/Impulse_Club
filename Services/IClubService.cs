@@ -7,8 +7,10 @@ namespace ImpulseClub.Services
     {
         Task<IEnumerable<Club>> GetAll();
         Task<Club?> GetOne(Guid id);
-        Task<Club> CreateClub(CreateClubDto dto);
-        Task<Club> UpdateClub(UpdateClubDto dto, Guid id);
+        Task<Club> CreateClub(CreateClubDto dto, Guid userId);
+        Task<Club> UpdateClub(UpdateClubDto dto, Guid id, Guid userId);
         Task DeleteClub(Guid id);
+        Task JoinClub(Guid clubId, Guid userId);
+        Task<IEnumerable<User>> GetClubMembers(Guid clubId);
     }
 }

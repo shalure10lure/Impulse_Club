@@ -9,11 +9,11 @@ namespace ImpulseClub.Controllers
 {
     [ApiController]
     [Route("api/v1/[controller]")]
-    public class ClubController : ControllerBase
+    public class TrainingController : ControllerBase
     {
-        private readonly IClubService _service;
+        private readonly ITrainingService _service;
 
-        public ClubController(IClubService service)
+        public TrainingController(ITrainingService service)
         {
             _service = service;
         }
@@ -21,8 +21,8 @@ namespace ImpulseClub.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var clubs = await _service.GetAll();
-            return Ok(clubs);
+            var trainings = await _service.GetAll();
+            return Ok(trainings);
         }
 
         [HttpGet("{id:guid}")]
@@ -33,56 +33,56 @@ namespace ImpulseClub.Controllers
             return Ok(item);
         }
 
+        // Get trainings by club
+        [HttpGet("club/{clubId:guid}")]
+        public async Task<IActionResult> GetByClubId(Guid clubId)
+        {
+            var trainings = await _service.GetTrainingsByClub(clubId);
+            return Ok(trainings);
+        }
+
         [HttpPost]
         [Authorize(Policy = "FounderOrAdmin")]
-        public async Task<IActionResult> Create([FromBody] CreateClubDto dto)
+        public async Task<IActionResult> Create([FromBody] CreateTrainingDto dto)
         {
             if (!ModelState.IsValid) return ValidationProblem(ModelState);
 
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            var created = await _service.CreateClub(dto, userId);
+            var created = await _service.CreateTraining(dto, userId);
             
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
         [HttpPut("{id:guid}")]
         [Authorize(Policy = "FounderOrAdmin")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateClubDto dto)
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateTrainingDto dto)
         {
             if (!ModelState.IsValid) return ValidationProblem(ModelState);
 
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            var updated = await _service.UpdateClub(dto, id, userId);
+            var updated = await _service.UpdateTraining(dto, id, userId);
             
             return Ok(updated);
         }
 
         [HttpDelete("{id:guid}")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "FounderOrAdmin")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            await _service.DeleteClub(id);
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            await _service.DeleteTraining(id, userId);
             return NoContent();
         }
 
-        // User joins a club
+        // User joins a training
         [HttpPost("{id:guid}/join")]
         [Authorize]
-        public async Task<IActionResult> JoinClub(Guid id)
+        public async Task<IActionResult> JoinTraining(Guid id)
         {
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            await _service.JoinClub(id, userId);
+            await _service.JoinTraining(id, userId);
             
-            return Ok(new { message = "You have successfully joined the club" });
-        }
-
-        // Get club members
-        [HttpGet("{id:guid}/members")]
-        [Authorize]
-        public async Task<IActionResult> GetMembers(Guid id)
-        {
-            var members = await _service.GetClubMembers(id);
-            return Ok(members);
+            return Ok(new { message = "You have successfully joined the training" });
         }
     }
 }

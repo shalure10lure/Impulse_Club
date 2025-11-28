@@ -7,82 +7,82 @@ namespace ImpulseClub.Data
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-        public DbSet<Usuario> Usuarios => Set<Usuario>();
-        public DbSet<Club> Clubes => Set<Club>();
-        public DbSet<Entrenamiento> Entrenamientos => Set<Entrenamiento>();
-        public DbSet<Recurso> Recursos => Set<Recurso>();
+        public DbSet<User> Users => Set<User>();
+        public DbSet<Club> Clubs => Set<Club>();
+        public DbSet<Training> Trainings => Set<Training>();
+        public DbSet<Resource> Resources => Set<Resource>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configurar Usuario
-            modelBuilder.Entity<Usuario>(entity =>
+            // Configure User
+            modelBuilder.Entity<User>(entity =>
             {
                 entity.HasKey(u => u.Id);
                 entity.HasIndex(u => u.Email).IsUnique();
 
-                // Relación 1:1 Usuario <-> Club (fundador)
-                entity.HasOne(u => u.ClubFundado)
-                    .WithOne(c => c.Fundador)
-                    .HasForeignKey<Usuario>(u => u.ClubFundadoId)
+                // 1:1 Relationship User <-> Club (founder)
+                entity.HasOne(u => u.FoundedClub)
+                    .WithOne(c => c.Founder)
+                    .HasForeignKey<User>(u => u.FoundedClubId)
                     .OnDelete(DeleteBehavior.SetNull);
             });
 
-            // Configurar Club
+            // Configure Club
             modelBuilder.Entity<Club>(entity =>
             {
                 entity.HasKey(c => c.Id);
 
-                // Relación N:M Club <-> Usuario (miembros)
-                entity.HasMany(c => c.Miembros)
-                    .WithMany(u => u.Clubes)
+                // N:M Relationship Club <-> User (members)
+                entity.HasMany(c => c.Members)
+                    .WithMany(u => u.Clubs)
                     .UsingEntity<Dictionary<string, object>>(
-                        "ClubMiembros",
-                        j => j.HasOne<Usuario>().WithMany().HasForeignKey("UsuarioId"),
-                        j => j.HasOne<Club>().WithMany().HasForeignKey("ClubId")
+                        "ClubMembers",
+                        j => j.HasOne<User>().WithMany().HasForeignKey("UserId").OnDelete(DeleteBehavior.Cascade),
+                        j => j.HasOne<Club>().WithMany().HasForeignKey("ClubId").OnDelete(DeleteBehavior.Cascade)
                     );
 
-                // Relación 1:N Club -> Entrenamientos
-                entity.HasMany(c => c.Entrenamientos)
-                    .WithOne(e => e.Club)
-                    .HasForeignKey(e => e.ClubId)
+                // 1:N Relationship Club -> Trainings
+                entity.HasMany(c => c.Trainings)
+                    .WithOne(t => t.Club)
+                    .HasForeignKey(t => t.ClubId)
                     .OnDelete(DeleteBehavior.Cascade);
 
-                // Relación 1:N Club -> Recursos
-                entity.HasMany(c => c.Recursos)
+                // 1:N Relationship Club -> Resources
+                entity.HasMany(c => c.Resources)
                     .WithOne(r => r.Club)
                     .HasForeignKey(r => r.ClubId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // Configurar Entrenamiento
-            modelBuilder.Entity<Entrenamiento>(entity =>
+            // Configure Training
+            modelBuilder.Entity<Training>(entity =>
             {
-                entity.HasKey(e => e.Id);
+                entity.HasKey(t => t.Id);
 
-                // Relación N:M Entrenamiento <-> Usuario (participantes)
-                entity.HasMany(e => e.Participantes)
-                    .WithMany(u => u.Entrenamientos)
+                // N:M Relationship Training <-> User (participants)
+                entity.HasMany(t => t.Participants)
+                    .WithMany(u => u.Trainings)
                     .UsingEntity<Dictionary<string, object>>(
-                        "EntrenamientoParticipantes",
-                        j => j.HasOne<Usuario>().WithMany().HasForeignKey("UsuarioId"),
-                        j => j.HasOne<Entrenamiento>().WithMany().HasForeignKey("EntrenamientoId")
+                        "TrainingParticipants",
+                        j => j.HasOne<User>().WithMany().HasForeignKey("UserId").OnDelete(DeleteBehavior.Cascade),
+                        j => j.HasOne<Training>().WithMany().HasForeignKey("TrainingId").OnDelete(DeleteBehavior.Cascade)
                     );
             });
 
-            // Configurar Recurso
-            modelBuilder.Entity<Recurso>(entity =>
+            // Configure Resource
+            modelBuilder.Entity<Resource>(entity =>
             {
                 entity.HasKey(r => r.Id);
 
-                // Relación N:M Recurso <-> Usuario (reservas)
-                entity.HasMany(r => r.UsuariosQueReservaron)
-                    .WithMany(u => u.RecursosReservados)
+                // N:M Relationship Resource <-> User (reservations)
+                entity.HasMany(r => r.UsersWhoReserved)
+                    .WithMany(u => u.ReservedResources)
                     .UsingEntity<Dictionary<string, object>>(
-                        "RecursoReservas",
-                        j => j.HasOne<Usuario>().WithMany().HasForeignKey("UsuarioId"),
-                        j => j.HasOne<Recurso>().WithMany().HasForeignKey("RecursoId")
+                        "ResourceReservations",
+                        j => j.HasOne<User>().WithMany().HasForeignKey("UserId").OnDelete(DeleteBehavior.Cascade),
+                        j => j.HasOne<Resource>().WithMany().HasForeignKey("ResourceId").OnDelete(DeleteBehavior.Cascade)
                     );
             });
         }
