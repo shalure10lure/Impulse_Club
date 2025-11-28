@@ -1,4 +1,4 @@
-﻿using ImpulseClub.Models.DTOS;
+﻿using ImpulseClub.Entities.DTOS;
 using ImpulseClub.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,7 +16,7 @@ namespace ImpulseClub.Controllers
             _service = service;
         }
         [HttpGet]
-     //   [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "FounderOrAdmin")]
         public async Task<IActionResult> GetAll()
         {
             var users = await _service.GetAll();
@@ -40,7 +40,7 @@ namespace ImpulseClub.Controllers
             return CreatedAtAction(nameof(GetById), new { id }, updated);
         }
 
-       // [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "AdminOnly")]
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> Delete(Guid id)
         {

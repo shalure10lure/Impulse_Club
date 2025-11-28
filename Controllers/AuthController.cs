@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using ImpulseClub.Models.DTOS;
 using ImpulseClub.Models.DTOS.ImpulseClub.Models.DTOS;
 using ImpulseClub.Services;
+using ImpulseClub.Entities.DTOS;
 
 namespace ImpulseClub.Controllers
 {

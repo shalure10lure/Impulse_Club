@@ -1,5 +1,5 @@
 using ImpulseClub.Entities;
-using ImpulseClub.Models.DTOS;
+using ImpulseClub.Entities.DTOS;
 using ImpulseClub.Models.DTOS.ImpulseClub.Models.DTOS;
 using ImpulseClub.Repositories;
 using Microsoft.Extensions.Configuration;
