@@ -1,13 +1,15 @@
-﻿
-using ImpulseClub.Data;
-using ImpulseClub.Models;
 using Microsoft.EntityFrameworkCore;
+using ImpulseClub.Data;
+using ImpulseClub.Entities;
 
 namespace ImpulseClub.Repositories
 {
     public class ClubRepository : IClubRepository
     {
         private readonly AppDbContext _db;
+        public ClubRepository(AppDbContext db) { _db = db; }
+
+        public async Task AddAsync(Club club)
         public ClubRepository(AppDbContext db)
         {
             _db = db;

@@ -1,4 +1,4 @@
-﻿using ImpulseClub.Models;
+﻿using ImpulseClub.Entities;
 using ImpulseClub.Models.DTOS;
 using ImpulseClub.Repositories;
 
@@ -13,24 +13,24 @@ namespace ImpulseClub.Services
             _repo = repo;
         }
 
-        public async Task<IEnumerable<User>> GetAll()
+        public async Task<IEnumerable<Usuario>> GetAll()
         {
             return await _repo.GetAll();
         }
 
-        public async Task<User?> GetOne(Guid id)
+        public async Task<Usuario?> GetOne(Guid id)
         {
             return await _repo.GetById(id);
         }
 
-        public async Task<User> UpdateUser(UpdateUserDto dto, Guid id)
+        public async Task<Usuario> UpdateUser(UpdateUserDto dto, Guid id)
         {
-            User? user = await GetOne(id);
+            Usuario? user = await GetOne(id);
             if (user == null)
                 throw new Exception("Usuario no encontrado");
 
             if (!string.IsNullOrEmpty(dto.Name))
-                user.Username = dto.Name;
+                user.Nombre = dto.Name;
 
             if (!string.IsNullOrEmpty(dto.Email))
                 user.Email = dto.Email;
@@ -44,7 +44,7 @@ namespace ImpulseClub.Services
 
         public async Task DeleteUser(Guid id)
         {
-            User? user = (await GetAll()).FirstOrDefault(h => h.Id == id);
+            Usuario? user = (await GetAll()).FirstOrDefault(h => h.Id == id);
             if (user == null) return;
             await _repo.DeleteAsync(user);
         }
