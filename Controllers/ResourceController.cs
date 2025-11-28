@@ -9,11 +9,11 @@ namespace ImpulseClub.Controllers
 {
     [ApiController]
     [Route("api/v1/[controller]")]
-    public class ClubController : ControllerBase
+    public class ResourceController : ControllerBase
     {
-        private readonly IClubService _service;
+        private readonly IResourceService _service;
 
-        public ClubController(IClubService service)
+        public ResourceController(IResourceService service)
         {
             _service = service;
         }
@@ -21,8 +21,8 @@ namespace ImpulseClub.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var clubs = await _service.GetAll();
-            return Ok(clubs);
+            var resources = await _service.GetAll();
+            return Ok(resources);
         }
 
         [HttpGet("{id:guid}")]
@@ -35,54 +35,48 @@ namespace ImpulseClub.Controllers
 
         [HttpPost]
         [Authorize(Policy = "FounderOrAdmin")]
-        public async Task<IActionResult> Create([FromBody] CreateClubDto dto)
+        public async Task<IActionResult> Create([FromBody] CreateResourceDto dto)
         {
             if (!ModelState.IsValid) return ValidationProblem(ModelState);
 
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            var created = await _service.CreateClub(dto, userId);
+            var created = await _service.CreateResource(dto, userId);
             
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
         [HttpPut("{id:guid}")]
         [Authorize(Policy = "FounderOrAdmin")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateClubDto dto)
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateResourceDto dto)
         {
             if (!ModelState.IsValid) return ValidationProblem(ModelState);
 
             var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            var updated = await _service.UpdateClub(dto, id, userId);
+            var updated = await _service.UpdateResource(dto, id, userId);
             
             return Ok(updated);
         }
 
         [HttpDelete("{id:guid}")]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "FounderOrAdmin")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            await _service.DeleteClub(id);
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            await _service.DeleteResource(id, userId);
             return NoContent();
         }
 
-        // User joins a club
-        [HttpPost("{id:guid}/join")]
+        // Reserve resource
+        [HttpPost("{id:guid}/reserve")]
         [Authorize]
-        public async Task<IActionResult> JoinClub(Guid id)
+        public async Task<IActionResult> Reserve(Guid id, [FromBody] ResourceReservationDto dto)
         {
-            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            await _service.JoinClub(id, userId);
-            
-            return Ok(new { message = "You have successfully joined the club" });
-        }
+            if (!ModelState.IsValid) return ValidationProblem(ModelState);
 
-        // Get club members
-        [HttpGet("{id:guid}/members")]
-        [Authorize]
-        public async Task<IActionResult> GetMembers(Guid id)
-        {
-            var members = await _service.GetClubMembers(id);
-            return Ok(members);
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            await _service.ReserveResource(id, userId, dto.Quantity);
+            
+            return Ok(new { message = "Resource successfully reserved" });
         }
     }
 }

@@ -7,37 +7,60 @@ namespace ImpulseClub.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        private readonly AppDbContext _ctx;
-        public UserRepository(AppDbContext ctx) { _ctx = ctx; }
-
-        public async Task<IEnumerable<Usuario>> GetAll()
-        {
-            return await _ctx.Usuarios.ToListAsync();
-        }
-        public Task<Usuario?> GetById(Guid id) =>
-            _ctx.Usuarios.FirstOrDefaultAsync(x => x.Id == id);
-
-        public Task<Usuario?> GetByEmailAddress(string email) =>
-            _ctx.Usuarios.FirstOrDefaultAsync(u => u.Email == email);
-
-        public Task<Usuario?> GetByRefreshToken(string refreshToken) =>
-            _ctx.Usuarios.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
-
-        public async Task AddAsync(Usuario user)
-        {
-            _ctx.Usuarios.Add(user);
-            await _ctx.SaveChangesAsync();
+        private readonly AppDbContext _context;
+        
+        public UserRepository(AppDbContext context) 
+        { 
+            _context = context; 
         }
 
-        public async Task UpdateAsync(Usuario user)
+        public async Task<IEnumerable<User>> GetAll()
         {
-            _ctx.Usuarios.Update(user);
-            await _ctx.SaveChangesAsync();
+            return await _context.Users.ToListAsync();
         }
-        public async Task DeleteAsync(Usuario user)
+
+        public async Task<User?> GetById(Guid id)
         {
-            _ctx.Usuarios.Remove(user);
-            await _ctx.SaveChangesAsync();
+            return await _context.Users
+                .Include(u => u.Clubs)
+                .Include(u => u.FoundedClub)
+                .FirstOrDefaultAsync(x => x.Id == id);
+        }
+
+        public async Task<User?> GetByIdAsync(Guid id)
+        {
+            return await _context.Users
+                .Include(u => u.Clubs)
+                .Include(u => u.FoundedClub)
+                .FirstOrDefaultAsync(x => x.Id == id);
+        }
+
+        public async Task<User?> GetByEmailAddress(string email)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        }
+
+        public async Task<User?> GetByRefreshToken(string refreshToken)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
+        }
+
+        public async Task AddAsync(User user)
+        {
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateAsync(User user)
+        {
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(User user)
+        {
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
         }
     }
 }

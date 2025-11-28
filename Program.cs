@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using ImpulseClub.Data;
 using ImpulseClub.Repositories;
 using ImpulseClub.Services;
+using ImpulseClub.Middleware;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -52,7 +53,7 @@ builder.Services
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly", p => p.RequireRole("Admin"));
-    options.AddPolicy("FundadorOrAdmin", p => p.RequireRole("Fundador", "Admin"));
+    options.AddPolicy("FounderOrAdmin", p => p.RequireRole("Founder", "Admin"));
 });
 
 var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
@@ -70,20 +71,23 @@ if (string.IsNullOrEmpty(connectionString))
 
 builder.Services.AddDbContext<AppDbContext>(opt => opt.UseNpgsql(connectionString));
 
-// Registrar servicios (próximos pasos)
-builder.Services.AddScoped<IAuthService, AuthService>();
+// Register repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IUserService, UserService>();
-
 builder.Services.AddScoped<IClubRepository, ClubRepository>();
-builder.Services.AddScoped<IEntrenamientoRepository, EntrenamientoRepository>();
-builder.Services.AddScoped<IRecursoRepository, RecursoRepository>();
+builder.Services.AddScoped<ITrainingRepository, TrainingRepository>();
+builder.Services.AddScoped<IResourceRepository, ResourceRepository>();
 
+// Register services
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IClubService, ClubService>();
-builder.Services.AddScoped<IEntrenamientoService, EntrenamientoService>();
-builder.Services.AddScoped<IRecursoService, RecursoService>();
+builder.Services.AddScoped<ITrainingService, TrainingService>();
+builder.Services.AddScoped<IResourceService, ResourceService>();
 
 var app = builder.Build();
+
+// Configure middleware
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
