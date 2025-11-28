@@ -120,7 +120,7 @@ var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
 
 if (string.IsNullOrEmpty(connectionString))
 {
-    var dbHost = Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "postgres";
+    var dbHost = Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "localhost";
     var dbName = Environment.GetEnvironmentVariable("POSTGRES_DB") ?? "impulseclubdb";
     var dbUser = Environment.GetEnvironmentVariable("POSTGRES_USER") ?? "impulseclubuser";
     var dbPass = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD") ?? "supersecret";
