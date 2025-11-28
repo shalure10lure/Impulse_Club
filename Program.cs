@@ -116,10 +116,22 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("FounderOrAdmin", p => p.RequireRole("Founder", "Admin"));
 });
 
-var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
+var connectionUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 
-if (string.IsNullOrEmpty(connectionString))
+string connectionString;
+
+if (!string.IsNullOrEmpty(connectionUrl))
 {
+    // convierte postgres:// a formato Npgsql
+    var uri = new Uri(connectionUrl);
+    var userInfo = uri.UserInfo.Split(':');
+
+    connectionString =
+        $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
+}
+else
+{
+    // modo local
     var dbHost = Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "localhost";
     var dbName = Environment.GetEnvironmentVariable("POSTGRES_DB") ?? "impulseclubdb";
     var dbUser = Environment.GetEnvironmentVariable("POSTGRES_USER") ?? "impulseclubuser";
@@ -128,7 +140,6 @@ if (string.IsNullOrEmpty(connectionString))
 
     connectionString =
         $"Host={dbHost};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPass}";
-
 }
 
 builder.Services.AddDbContext<AppDbContext>(opt =>
