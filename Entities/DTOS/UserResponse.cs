@@ -1,4 +1,4 @@
-namespace ImpulseClub.Models.DTOS
+namespace ImpulseClub.Entities.DTOS
 {
     public class UserResponse
     {

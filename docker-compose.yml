@@ -1,13 +1,29 @@
-version: '3.8'
-
 services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: impulse_club_api
+    env_file:
+      - .env
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - DATABASE_URL=Host=postgres;Port=5432;Database=impulseclubdb;Username=impulseclubuser;Password=supersecret
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - impulse_network
+
   postgres:
     image: postgres:16-alpine
     container_name: impulse_club_db
     environment:
-      POSTGRES_DB: impulseclub_db
-      POSTGRES_USER: impulse_admin
-      POSTGRES_PASSWORD: impulse_secret_2024
+      POSTGRES_DB: impulseclubdb
+      POSTGRES_USER: impulseclubuser
+      POSTGRES_PASSWORD: supersecret
     ports:
       - "5432:5432"
     volumes:
@@ -15,36 +31,11 @@ services:
     networks:
       - impulse_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U impulse_admin"]
+      test: ["CMD-SHELL", "pg_isready -U impulseclubuser -d impulseclubdb"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: impulse_club_api
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_HTTP_PORTS=8080
-      - DATABASE_URL=Host=postgres;Port=5432;Database=impulseclub_db;Username=impulse_admin;Password=impulse_secret_2024
-      - JWT_KEY=dGhpc2lzYXZlcnlsb25nc2VjdXJla2V5Zm9yand0dG9rZW5zMTIzNDU2Nzg5MA==
-      - JWT_ISSUER=ImpulseClubAPI
-      - JWT_AUDIENCE=ImpulseClubUsers
-      - PORT=8080
-    ports:
-      - "5000:8080"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - impulse_network
-
 volumes:
   postgres_data:
-    driver: local
 
-networks:
-  impulse_network:
-    driver: bridge

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace ImpulseClub.Models.DTOS
+namespace ImpulseClub.Entities.DTOS
 {
     public class UpdateResourceDto
     {

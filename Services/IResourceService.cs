@@ -1,5 +1,5 @@
 using ImpulseClub.Entities;
-using ImpulseClub.Models.DTOS;
+using ImpulseClub.Entities.DTOS;
 
 namespace ImpulseClub.Services
 {

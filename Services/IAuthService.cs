@@ -1,4 +1,4 @@
-using ImpulseClub.Models.DTOS;
+using ImpulseClub.Entities.DTOS;
 using ImpulseClub.Models.DTOS.ImpulseClub.Models.DTOS;
 
 namespace ImpulseClub.Services
