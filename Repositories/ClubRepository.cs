@@ -6,40 +6,76 @@ namespace ImpulseClub.Repositories
 {
     public class ClubRepository : IClubRepository
     {
-        private readonly AppDbContext _db;
-        public ClubRepository(AppDbContext db) { _db = db; }
+        private readonly AppDbContext _context;
 
-        public async Task AddAsync(Club club)
-        public ClubRepository(AppDbContext db)
+        public ClubRepository(AppDbContext context)
         {
-            _db = db;
-        }
-        public async Task Add(Club club)
-        {
-            await _db.Clubes.AddAsync(club);
-            await _db.SaveChangesAsync();
-        }
-
-        public async Task Delete(Club club)
-        {
-            _db.Clubes.Remove(club);
-            await _db.SaveChangesAsync();
+            _context = context;
         }
 
         public async Task<IEnumerable<Club>> GetAll()
         {
-            return await _db.Clubes.ToListAsync();
+            return await _context.Clubs.Include(c => c.Founder).ToListAsync();
         }
 
-        public async Task<Club> GetOne(Guid id)
+        public async Task<IEnumerable<Club>> GetAllAsync()
         {
-            return await _db.Clubes.FirstOrDefaultAsync(x => x.Id == id);
+            return await _context.Clubs
+                .Include(c => c.Founder)
+                .ToListAsync();
         }
 
-        public async Task Update(Club club)
+        public async Task<Club?> GetById(Guid id)
         {
-            _db.Clubes.Update(club);
-            await _db.SaveChangesAsync();
+            return await _context.Clubs
+                .Include(c => c.Founder)
+                .FirstOrDefaultAsync(c => c.Id == id);
+        }
+
+        public async Task<Club?> GetByIdAsync(Guid id)
+        {
+            return await _context.Clubs
+                .Include(c => c.Founder)
+                .Include(c => c.Resources)
+                .Include(c => c.Trainings)
+                .FirstOrDefaultAsync(c => c.Id == id);
+        }
+
+        public async Task<Club?> GetByIdWithMiembrosAsync(Guid id)
+        {
+            return await _context.Clubs
+                .Include(c => c.Members)
+                .FirstOrDefaultAsync(c => c.Id == id);
+        }
+
+        public async Task<Club?> GetByFundadorIdAsync(Guid fundadorId)
+        {
+            return await _context.Clubs.FirstOrDefaultAsync(c => c.FounderId == fundadorId);
+        }
+
+        public async Task<IEnumerable<Club>> GetClubesByUsuarioIdAsync(Guid usuarioId)
+        {
+            return await _context.Clubs
+                .Where(c => c.Members.Any(m => m.Id == usuarioId))
+                .ToListAsync();
+        }
+
+        public async Task AddAsync(Club club)
+        {
+            _context.Clubs.Add(club);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateAsync(Club club)
+        {
+            _context.Clubs.Update(club);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(Club club)
+        {
+            _context.Clubs.Remove(club);
+            await _context.SaveChangesAsync();
         }
     }
 }
