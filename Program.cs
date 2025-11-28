@@ -75,6 +75,14 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 
+builder.Services.AddScoped<IClubRepository, ClubRepository>();
+builder.Services.AddScoped<IEntrenamientoRepository, EntrenamientoRepository>();
+builder.Services.AddScoped<IRecursoRepository, RecursoRepository>();
+
+builder.Services.AddScoped<IClubService, ClubService>();
+builder.Services.AddScoped<IEntrenamientoService, EntrenamientoService>();
+builder.Services.AddScoped<IRecursoService, RecursoService>();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
