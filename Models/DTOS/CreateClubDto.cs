@@ -2,13 +2,12 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ImpulseClub.Models.DTOS
 {
-    public record CreateClubDto
+    public class CreateClubDto
     {
-        [Required]
-        public string Nombre { get; init; }
-        [Required]
-        public string TipoDeDeporte { get; init; }
-        [Required]
-        public Guid FundadorId { get; init; }
+        [Required, StringLength(100)]
+        public string Name { get; set; } = string.Empty;
+
+        [Required, StringLength(50)]
+        public string SportType { get; set; } = string.Empty;
     }
 }
