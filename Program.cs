@@ -133,9 +133,9 @@ else
 {
     // modo local
     var dbHost = Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "localhost";
-    var dbName = Environment.GetEnvironmentVariable("POSTGRES_DB") ?? "impulseclubdb";
-    var dbUser = Environment.GetEnvironmentVariable("POSTGRES_USER") ?? "impulseclubuser";
-    var dbPass = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD") ?? "supersecret";
+    var dbName = Environment.GetEnvironmentVariable("POSTGRES_DB") ;
+    var dbUser = Environment.GetEnvironmentVariable("POSTGRES_USER") ;
+    var dbPass = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD");
     var dbPort = Environment.GetEnvironmentVariable("POSTGRES_PORT") ?? "5432";
 
     connectionString =
